@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://momentjs.com/downloads/moment.js"></script>
+    <!-- <link rel="stylesheet" href="/css/my_ride_styles.css" /> -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Your App Name" />
+    <link rel="apple-touch-icon" href="/path/to/your/icon.png" />
+
+    <link
+      rel="icon"
+      href="https://www.drivencarguide.co.nz/media/fwnpg2w1/209185116_l_normal_none.jpg?width=1028&rnd=133384649079030000"
+      type="image/jpg"
+      sizes="16x16 32x32 48x48 64x64"
+    />
+    <style>
+      body {
+        height: 100vh; /* גובה מלא לחלון הצפה */
+        background-color: violet;
+        display: grid;
+        grid-template-areas: "header" "main" "main" "main" "main" "footer";
+        display: fullscreen;
+      }
+      header {
+        grid-area: header;
+        display: flex;
+      }
+      .topBar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-size: xx-large;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+      }
+      #exitTime {
+        background-color: seagreen;
+        color: white;
+      }
+      #exit-time-modal {
+        z-index: +3;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #exit-time-input {
+        padding: 5px;
+        font-size: 26px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        outline: none;
+      }
+      #logo {
+        font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+        font-style: italic;
+        text-shadow: 2px 2px 4px #888;
+      }
+      #datetime {
+        background-color: darkblue;
+        color: white;
+      }
+      main {
+        grid-area: main;
+        background-color: #c5acf9;
+        display: grid;
+        grid-template-areas: "frontCar" "backCar";
+        place-items: center;
+      }
+      #frontCar {
+        grid-area: frontCar;
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        place-items: center;
+      }
+      #backCar {
+        grid-area: backCar;
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        place-items: center;
+      }
+      #frontCar .person {
+        width: 60%;
+        height: 80%;
+      }
+      #backCar .person {
+        width: 80%;
+        height: 80%;
+      }
+      .person {
+        z-index: +1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-size: xxx-large;
+        border: 1px solid black;
+      }
+      .person:hover {
+        background-color: #c5acf0;
+      }
+      .person button {
+        z-index: +3;
+        font-size: x-large;
+        width: 70%;
+        height: 30%;
+      }
+      #driver {
+        background-color: aqua;
+      }
+      footer {
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        grid-area: footer;
+        background-color: black;
+      }
+    </style>
+    <title>מי בטרמפ</title>
+  </head>
+  <body onload="init()">
+    <header>
+      <span id="exitTime" class="topBar" onclick="updateExitTime()"></span>
+      <span id="logo" class="topBar">? מי בטרמפ</span>
+      <span class="topBar" id="datetime"></span>
+    </header>
+    <main>
+      <div id="frontCar">
+        <span class="person" id="driver" onclick="addDriver(this)">נהג/ת</span>
+        <span class="person" id="passenger1" onclick="addName(this)"
+          >הוספת נוסע/ת</span
+        >
+      </div>
+      <div id="backCar">
+        <span class="person" id="passenger2" onclick="addName(this)"
+          >הוספת נוסע/ת</span
+        >
+        <span class="person" id="passenger3" onclick="addName(this)"
+          >הוספת נוסע/ת</span
+        >
+        <span class="person" id="passenger4" onclick="addName(this)"
+          >הוספת נוסע/ת</span
+        >
+      </div>
+    </main>
+    <footer>&copy; Zion Amar</footer>
+    <script>
+      // עדכון התאריך והשעה
+      function updateDateTime() {
+        const currentDate = new Date();
+        const options = {
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+          second: "numeric",
+          timeZone: "Asia/Jerusalem",
+        };
+        const now = new Intl.DateTimeFormat("he-IL", options).format(
+          currentDate
+        );
+
+        const currentTimeElement = document.getElementById("datetime");
+        currentTimeElement.innerHTML = now.replace(", ", "<br>");
+      }
+      function ExitTime() {
+        let exitTime = document.querySelector("#exitTime");
+        if (localStorage.exitTime) {
+          exitTime.innerHTML = `:שעת יציאה<br/>${localStorage.exitTime}`;
+          exitTime.style.backgroundColor = "red";
+        } else {
+          exitTime.innerHTML = ":שעת יציאה<br/>15:10";
+        }
+      }
+      function updateExitTime() {
+        let password = prompt("הכניסו סיסמה:");
+        if (password === "301754826") {
+          let timeInput = document.createElement("input");
+          timeInput.id = "exit-time-input";
+          timeInput.type = "time";
+
+          let modal = document.createElement("div");
+          modal.id = "exit-time-modal";
+          modal.style.display = "none";
+          modal.addEventListener("click", function (event) {
+            if (event.target === modal) {
+              modal.style.display = "none";
+              let selectedTime = timeInput.value;
+              if (selectedTime) {
+                localStorage.setItem("exitTime", selectedTime);
+                ExitTime();
+                scheduleNotification(selectedTime);
+              }
+            }
+          });
+
+          let modalContent = document.createElement("div");
+          modalContent.classList.add("modal-content");
+          modalContent.appendChild(timeInput);
+          modal.appendChild(modalContent);
+          document.body.appendChild(modal);
+
+          modal.style.display = "flex";
+        } else {
+          alert("סיסמה שגויה");
+        }
+      }
+
+      function namesLoad() {
+        if (localStorage.getItem("driver")) {
+          document.querySelector("#driver").innerHTML =
+            localStorage.getItem("driver");
+        }
+        for (let i = 1; i <= 4; i++) {
+          if (localStorage.getItem(`passenger${i}`)) {
+            document.querySelector(`#passenger${i}`).innerHTML =
+              localStorage.getItem(`passenger${i}`);
+            document.querySelector(`#passenger${i}`).style.backgroundColor =
+              "red";
+            document.querySelector(`#passenger${i}`).style.color = "white";
+          } else {
+            document.querySelector(`#passenger${i}`).innerHTML = "הוספת נוסע/ת";
+          }
+        }
+        let currentHour = new Date().getHours();
+
+        if (currentHour < 11) {
+          namesDefault();
+        }
+      }
+      function addDriver(tag) {
+        let password = prompt("הכניסו סיסמה:");
+        if (password === "301754826") {
+          let newName = prompt("הכניסו שם נהג/ת:");
+          if (newName == "" || newName.length > 15) {
+            alert("שם אינו תקין");
+          } else {
+            tag.innerHTML = `${newName}`;
+            localStorage.setItem(tag.id, newName);
+          }
+        } else {
+          alert("סיסמה שגויה");
+        }
+      }
+      function namesDefault() {
+        let passengers = document.getElementsByClassName("person");
+        let names = ["הדר", "אסתי", "מאירה", "שילת"];
+        for (let j = 1; j <= 4; j++) {
+          if (!localStorage.getItem(`passenger${j}`)) {
+            passengers[j].innerHTML = `${
+              names[j - 1]
+            }<br/><button onclick="acsseptNames(${j},event)">אשר/י</button>`;
+          }
+        }
+      }
+      function acsseptNames(tag, event) {
+        event.stopPropagation(); // מונע התפשטות של האירוע לתגית האחרונה
+        let passengers = document.getElementsByClassName("person");
+        let names = ["הדר", "אסתי", "מאירה", "שילת"];
+        for (let j = 1; j <= 4; j++) {
+          if (j == tag) {
+            passengers[j].innerHTML = `${names[j - 1]}`;
+            passengers[j].style.color = "white";
+            passengers[j].style.backgroundColor = "red";
+            localStorage.setItem(passengers[j].id, names[j - 1]);
+          }
+        }
+      }
+      function addName(tag) {
+        if (tag.innerHTML === "הוספת נוסע/ת") {
+          let newName = prompt("הוסיפו שם נוסע/ת:");
+          if (newName == "" || newName.length > 15) {
+            alert("שם אינו תקין");
+          } else {
+            tag.innerHTML = `${newName}`;
+            tag.style.color = "white";
+            tag.style.backgroundColor = "red";
+            localStorage.setItem(tag.id, newName);
+          }
+        } else {
+          let password = prompt("הכניסו סיסמה:");
+          if (password === "301754826") {
+            let newName = prompt("הוסיפו שם נוסע/ת:");
+            if (newName == "" || newName.length > 15) {
+              alert("שם אינו תקין");
+            } else {
+              tag.innerHTML = `${newName}`;
+              tag.style.color = "white";
+              tag.style.backgroundColor = "red";
+              localStorage.setItem(tag.id, newName);
+            }
+          } else {
+            alert("סיסמה שגויה");
+          }
+        }
+      }
+      // function scheduleNotification(exitTime) {
+      //   if ("Notification" in window) {
+      //     Notification.requestPermission().then(function (permission) {
+      //       if (permission === "granted") {
+      //         let currentDateTime = new Date();
+      //         let exitDateTime = new Date();
+      //         exitDateTime.setHours(exitTime.split(":")[0]);
+      //         exitDateTime.setMinutes(exitTime.split(":")[1]);
+
+      //         if (
+      //           exitDateTime - currentDateTime <= 60 * 60 * 1000 &&
+      //           exitDateTime - currentDateTime > 0
+      //         ) {
+      //           let notification = new Notification("יוצאים עוד כשעה", {
+      //             body: "הירשם לנסיעה!",
+      //             icon: "path/to/icon.png",
+      //           });
+
+      //           // סגירת ההתראה לאחר שעה
+      //           setTimeout(function () {
+      //             notification.close();
+      //           }, 60 * 60 * 1000);
+      //         }
+      //       }
+      //     });
+      //   }
+      // }
+
+      function endDay() {
+        for (let i = 1; i <= 4; i++) {
+          localStorage.removeItem(`passenger${i}`);
+        }
+        localStorage.removeItem(`exitTime`);
+        document.querySelector(
+          "body"
+        ).innerHTML = `<h1 id="endDay">נתראה מחר</h1>`;
+        document.querySelector("#endDay").style.fontSize = "60px";
+        document.querySelector("#endDay").style.textAlign = "center";
+        document.querySelector("#endDay").style.alignItems = "center";
+      }
+      function changeView() {
+        var currentTime = new Date();
+        var currentHour = currentTime.getHours();
+        if (
+          (currentHour >= 15 && currentHour < 24) ||
+          (currentHour >= 0 && currentHour < 6)
+        ) {
+          endDay();
+        }
+      }
+      function init() {
+        // changeView();
+        namesLoad();
+        ExitTime();
+        updateDateTime();
+      }
+      // scheduleNotification(localStorage.getItem("exitTime"));
+
+      //בדיקה האם עבר 11 בבוקר
+      setInterval(namesLoad, 60000); // 600000 מייצגות 10 דקות במילישניות
+      // עדכון התאריך והשעה כל שנייה
+      setInterval(updateDateTime, 1000);
+    </script>
+    <!-- <script src="/js/mt_ride_script.js"></script> -->
+  </body>
+</html>
