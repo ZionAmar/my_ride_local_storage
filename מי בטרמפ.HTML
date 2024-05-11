@@ -163,6 +163,14 @@
     </main>
     <footer>&copy; Zion Amar</footer>
     <script>
+      let names = [];
+      for (let k = 0; k < 4; k++) {
+        names[k] = localStorage.getItem(`defaultpassenger${k}`);
+      }
+      let timeToChange = localStorage.getItem("timeToChange");
+      let driverName = localStorage.getItem("driverName");
+      let timeToGoHome = localStorage.getItem("timeToGoHome");
+      let pass = localStorage.getItem("pass");
       // עדכון התאריך והשעה
       function updateDateTime() {
         const currentDate = new Date();
@@ -188,12 +196,12 @@
           exitTime.innerHTML = `:שעת יציאה<br/>${localStorage.exitTime}`;
           exitTime.style.backgroundColor = "red";
         } else {
-          exitTime.innerHTML = ":שעת יציאה<br/>15:10";
+          exitTime.innerHTML = `:שעת יציאה<br/>${timeToGoHome}`;
         }
       }
       function updateExitTime() {
         let password = prompt("הכניסו סיסמה:");
-        if (password === "301754826") {
+        if (password === pass) {
           let timeInput = document.createElement("input");
           timeInput.id = "exit-time-input";
           timeInput.type = "time";
@@ -224,9 +232,11 @@
           alert("סיסמה שגויה");
         }
       }
-
       function namesLoad() {
-        if (localStorage.getItem("driver")) {
+        if (!localStorage.getItem("driver")) {
+          document.querySelector("#driver").innerHTML =
+            localStorage.getItem("driverName");
+        } else {
           document.querySelector("#driver").innerHTML =
             localStorage.getItem("driver");
         }
@@ -242,17 +252,19 @@
           }
         }
         let currentHour = new Date().getHours();
+        console.log(currentHour);
+        console.log("ggg" + timeToChange);
 
-        if (currentHour < 11) {
+        if (currentHour < timeToChange) {
           namesDefault();
         }
       }
       function addDriver(tag) {
         let password = prompt("הכניסו סיסמה:");
-        if (password === "301754826") {
+        if (password === pass) {
           let newName = prompt("הכניסו שם נהג/ת:");
-          if (newName == "" || newName.length > 15) {
-            alert("שם אינו תקין");
+          if (newName.length < 2 || newName.length > 15) {
+            alert("הכנס שם תקין");
           } else {
             tag.innerHTML = `${newName}`;
             localStorage.setItem(tag.id, newName);
@@ -263,7 +275,6 @@
       }
       function namesDefault() {
         let passengers = document.getElementsByClassName("person");
-        let names = ["הדר", "אסתי", "מאירה", "שילת"];
         for (let j = 1; j <= 4; j++) {
           if (!localStorage.getItem(`passenger${j}`)) {
             passengers[j].innerHTML = `${
@@ -275,7 +286,6 @@
       function acsseptNames(tag, event) {
         event.stopPropagation(); // מונע התפשטות של האירוע לתגית האחרונה
         let passengers = document.getElementsByClassName("person");
-        let names = ["הדר", "אסתי", "מאירה", "שילת"];
         for (let j = 1; j <= 4; j++) {
           if (j == tag) {
             passengers[j].innerHTML = `${names[j - 1]}`;
@@ -288,8 +298,8 @@
       function addName(tag) {
         if (tag.innerHTML === "הוספת נוסע/ת") {
           let newName = prompt("הוסיפו שם נוסע/ת:");
-          if (newName == "" || newName.length > 15) {
-            alert("שם אינו תקין");
+          if (newName.length < 2 || newName.length > 15) {
+            alert("הכניסו שם תקין");
           } else {
             tag.innerHTML = `${newName}`;
             tag.style.color = "white";
@@ -298,10 +308,10 @@
           }
         } else {
           let password = prompt("הכניסו סיסמה:");
-          if (password === "301754826") {
+          if (password === pass) {
             let newName = prompt("הוסיפו שם נוסע/ת:");
-            if (newName == "" || newName.length > 15) {
-              alert("שם אינו תקין");
+            if (newName.length < 2 || newName.length > 15) {
+              alert("הכניסו שם תקין");
             } else {
               tag.innerHTML = `${newName}`;
               tag.style.color = "white";
@@ -313,34 +323,6 @@
           }
         }
       }
-      // function scheduleNotification(exitTime) {
-      //   if ("Notification" in window) {
-      //     Notification.requestPermission().then(function (permission) {
-      //       if (permission === "granted") {
-      //         let currentDateTime = new Date();
-      //         let exitDateTime = new Date();
-      //         exitDateTime.setHours(exitTime.split(":")[0]);
-      //         exitDateTime.setMinutes(exitTime.split(":")[1]);
-
-      //         if (
-      //           exitDateTime - currentDateTime <= 60 * 60 * 1000 &&
-      //           exitDateTime - currentDateTime > 0
-      //         ) {
-      //           let notification = new Notification("יוצאים עוד כשעה", {
-      //             body: "הירשם לנסיעה!",
-      //             icon: "path/to/icon.png",
-      //           });
-
-      //           // סגירת ההתראה לאחר שעה
-      //           setTimeout(function () {
-      //             notification.close();
-      //           }, 60 * 60 * 1000);
-      //         }
-      //       }
-      //     });
-      //   }
-      // }
-
       function endDay() {
         for (let i = 1; i <= 4; i++) {
           localStorage.removeItem(`passenger${i}`);
@@ -356,26 +338,35 @@
       function changeView() {
         var currentTime = new Date();
         var currentHour = currentTime.getHours();
+        // מקבלים את השעה מתוך המשתנה exitTime
+        var exitTime;
+        if (localStorage.getItem("exitTime")) {
+          exitTime = localStorage.getItem("exitTime");
+        } else {
+          exitTime = localStorage.getItem("timeToGoHome");
+        }
+        // משכילים רק את שעת היציאה מהמשתנה exitTime
+        var exitHour = parseInt(exitTime.split(":")[0]);
+        // אם השעה הנוכחית נמצאת בין השעה שנשמרה לבין חצות או בין חצות לשעה שנשמרה
         if (
-          (currentHour >= 15 && currentHour < 24) ||
+          (currentHour >= exitHour && currentHour < 24) ||
           (currentHour >= 0 && currentHour < 6)
         ) {
           endDay();
         }
       }
+
       function init() {
-        // changeView();
+        changeView();
         namesLoad();
         ExitTime();
         updateDateTime();
       }
-      // scheduleNotification(localStorage.getItem("exitTime"));
-
       //בדיקה האם עבר 11 בבוקר
       setInterval(namesLoad, 60000); // 600000 מייצגות 10 דקות במילישניות
+      setInterval(changeView, 60000); // 600000 מייצגות 10 דקות במילישניות
       // עדכון התאריך והשעה כל שנייה
       setInterval(updateDateTime, 1000);
     </script>
-    <!-- <script src="/js/mt_ride_script.js"></script> -->
   </body>
 </html>
