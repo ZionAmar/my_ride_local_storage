@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>הגדרות מי בטרמפ</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <style>
+      body {
+        height: 100vh;
+        background-color: violet;
+        display: grid;
+        grid-template-areas:
+          "header"
+          "main"
+          "footer";
+        margin: 0;
+      }
+
+      header {
+        grid-area: header;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 10px;
+        background-color: #c5acf9;
+        color: white;
+        font-size: 34px;
+      }
+      #logo {
+        color: rgb(250, 171, 250);
+        font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+        font-style: italic;
+        text-shadow: 2px 2px 4px #888;
+      }
+      main {
+        text-align: center;
+        margin: 0 auto;
+        grid-area: main;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        padding: 20px;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .input-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .input-group input {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        width: calc(100% - 22px); /* קיבוע הרוחב של האינפוטים */
+      }
+
+      .input-group input[type="submit"] {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+        margin: 0 auto; /* מרכז את הכפתור אופקית */
+        width: 80px; /* קיבוע רוחב הכפתור */
+      }
+
+      .input-group input[type="submit"]:hover {
+        background-color: #45a049;
+      }
+
+      footer {
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        grid-area: footer;
+        background-color: black;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span style="color: black">הגדרות</span>
+      <i style="color: white" class="fa fa-cogs" aria-hidden="true"></i>
+      <span id="logo">? מי בטרמפ</span>
+    </header>
+    <main>
+      <div class="input-group">
+        <label for="passenger1">נוסע/ת 1.</label>
+        <input id="passenger1" class="defaultpassenger" required type="text" />
+      </div>
+      <div class="input-group">
+        <label for="passenger2">נוסע/ת 2.</label>
+        <input id="passenger2" class="defaultpassenger" required type="text" />
+      </div>
+      <div class="input-group">
+        <label for="passenger3">נוסע/ת 3.</label>
+        <input id="passenger3" class="defaultpassenger" required type="text" />
+      </div>
+      <div class="input-group">
+        <label for="passenger4">נוסע/ת 4.</label>
+        <input id="passenger4" class="defaultpassenger" required type="text" />
+      </div>
+      <div class="input-group">
+        <label for="timeToChange">שעת יציאה קבועה</label>
+        <input
+          id="timeToGoHome"
+          class="defaultpassenger"
+          required
+          type="time"
+        />
+      </div>
+      <div class="input-group">
+        <label for="driverName">שם נהג/ת קבוע/ה</label>
+        <input id="driverName" class="defaultpassenger" required type="text" />
+      </div>
+      <div class="input-group">
+        <label for="timeToChange">שעת אישור נוסעים קבועים</label>
+        <input
+          id="timeToChange"
+          class="defaultpassenger"
+          required
+          type="time"
+        />
+      </div>
+      <div class="input-group">
+        <label for="pass">סיסמאת מנהל/ת</label>
+        <input id="pass" class="defaultpassenger" required type="password" />
+      </div>
+      <div class="input-group" style="grid-column: span 2">
+        <input type="submit" value="אישור" onclick="initDefaultValues()" />
+      </div>
+    </main>
+    <footer>&copy; Zion Amar</footer>
+    <script>
+      let defNames = [];
+      let timeToChange;
+      let driverName;
+      let timeToGoHome;
+      let pass;
+      function initDefaultValues() {
+        for (let k = 0; k < 4; k++) {
+          if (document.getElementsByClassName("defaultpassenger")[k].value) {
+            defNames[k] =
+              document.getElementsByClassName("defaultpassenger")[k].value;
+            localStorage.setItem(`defaultpassenger${k}`, defNames[k]);
+          }
+        }
+        if (document.querySelector("#timeToChange").value) {
+          let timeToChange = document.querySelector("#timeToChange").value; // משיג את הערך המלא של שדה הזמן
+          let formattedHours = timeToChange.split(":")[0].replace(/^0+/, ""); // מפריד את השעה מהדקות ומוחק אם יש 0 מובילים בתחילת השעה
+          localStorage.setItem(`timeToChange`, formattedHours);
+        }
+        if (document.querySelector("#driverName").value) {
+          localStorage.setItem(
+            `driverName`,
+            document.querySelector("#driverName").value
+          );
+        }
+        if (document.querySelector("#timeToGoHome").value) {
+          localStorage.setItem(
+            `timeToGoHome`,
+            document.querySelector("#timeToGoHome").value
+          );
+        }
+        if (document.querySelector("#pass").value) {
+          localStorage.setItem(`pass`, document.querySelector("#pass").value);
+        }
+        alert("הערכים הקבועים נשמרו בהצלחה!");
+        clearInputs();
+      }
+
+      function clearInputs() {
+        let inputs = document.querySelectorAll(".defaultpassenger");
+        inputs.forEach((input) => (input.value = ""));
+      }
+    </script>
+  </body>
+</html>
