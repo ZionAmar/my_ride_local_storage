@@ -136,7 +136,7 @@
     </style>
     <title>מי בטרמפ</title>
   </head>
-  <body onload="init()">
+  <body>
     <header>
       <span id="exitTime" class="topBar" onclick="updateExitTime()"></span>
       <span id="logo" class="topBar">? מי בטרמפ</span>
@@ -252,8 +252,6 @@
           }
         }
         let currentHour = new Date().getHours();
-        console.log(currentHour);
-        console.log("ggg" + timeToChange);
 
         if (currentHour < timeToChange) {
           namesDefault();
@@ -335,6 +333,36 @@
         document.querySelector("#endDay").style.textAlign = "center";
         document.querySelector("#endDay").style.alignItems = "center";
       }
+      function startDay() {
+        document.querySelector("#endDay").style.display = "none";
+        document.querySelector("body").innerHTML = `    <header>
+      <span id="exitTime" class="topBar" onclick="updateExitTime()"></span>
+      <span id="logo" class="topBar">? מי בטרמפ</span>
+      <span class="topBar" id="datetime"></span>
+    </header>
+    <main>
+      <div id="frontCar">
+        <span class="person" id="driver" onclick="addDriver(this)">נהג/ת</span>
+        <span class="person" id="passenger1" onclick="addName(this)"
+          >הוספת נוסע/ת</span
+        >
+      </div>
+      <div id="backCar">
+        <span class="person" id="passenger2" onclick="addName(this)"
+          >הוספת נוסע/ת</span
+        >
+        <span class="person" id="passenger3" onclick="addName(this)"
+          >הוספת נוסע/ת</span
+        >
+        <span class="person" id="passenger4" onclick="addName(this)"
+          >הוספת נוסע/ת</span
+        >
+      </div>
+    </main>
+    <footer>&copy; Zion Amar</footer>`;
+        namesLoad();
+        ExitTime();
+      }
       function changeView() {
         var currentTime = new Date();
         var currentHour = currentTime.getHours();
@@ -353,6 +381,8 @@
           (currentHour >= 0 && currentHour < 6)
         ) {
           endDay();
+        } else {
+          startDay();
         }
       }
 
@@ -367,6 +397,7 @@
       setInterval(changeView, 60000); // 600000 מייצגות 10 דקות במילישניות
       // עדכון התאריך והשעה כל שנייה
       setInterval(updateDateTime, 1000);
+      init();
     </script>
   </body>
 </html>
