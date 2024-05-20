@@ -24,7 +24,6 @@
         background-color: violet;
         display: grid;
         grid-template-areas: "header" "main" "main" "main" "main" "footer";
-        display: fullscreen;
       }
       header {
         grid-area: header;
@@ -138,7 +137,9 @@
   </head>
   <body>
     <header>
-      <span id="exitTime" class="topBar" onclick="updateExitTime()"></span>
+      <span id="exitTime" class="topBar" onclick="updateExitTime()"
+        >:שעת יציאה</span
+      >
       <span id="logo" class="topBar">? מי בטרמפ</span>
       <span class="topBar" id="datetime"></span>
     </header>
@@ -192,11 +193,15 @@
       }
       function ExitTime() {
         let exitTime = document.querySelector("#exitTime");
-        if (localStorage.exitTime) {
-          exitTime.innerHTML = `:שעת יציאה<br/>${localStorage.exitTime}`;
+        if (localStorage.getItem("exitTime")) {
+          exitTime.innerHTML = `:שעת יציאה<br/>${localStorage.getItem(
+            "exitTime"
+          )}`;
           exitTime.style.backgroundColor = "red";
         } else {
-          exitTime.innerHTML = `:שעת יציאה<br/>${timeToGoHome}`;
+          exitTime.innerHTML = `:שעת יציאה<br/>${localStorage.getItem(
+            "timeToGoHome"
+          )}`;
         }
       }
       function updateExitTime() {
@@ -233,9 +238,9 @@
         }
       }
       function namesLoad() {
+        let d = localStorage.getItem("driverName");
         if (!localStorage.getItem("driver")) {
-          document.querySelector("#driver").innerHTML =
-            localStorage.getItem("driverName");
+          document.querySelector("#driver").innerHTML = d;
         } else {
           document.querySelector("#driver").innerHTML =
             localStorage.getItem("driver");
@@ -275,9 +280,11 @@
         let passengers = document.getElementsByClassName("person");
         for (let j = 1; j <= 4; j++) {
           if (!localStorage.getItem(`passenger${j}`)) {
-            passengers[j].innerHTML = `${
-              names[j - 1]
-            }<br/><button onclick="acsseptNames(${j},event)">אשר/י</button>`;
+            if (localStorage.getItem(`defaultpassenger${j - 1}`)) {
+              passengers[j].innerHTML = `${
+                names[j - 1]
+              }<br/><button onclick="acsseptNames(${j},event)">אשר/י</button>`;
+            }
           }
         }
       }
@@ -334,32 +341,34 @@
         document.querySelector("#endDay").style.alignItems = "center";
       }
       function startDay() {
-        document.querySelector("#endDay").style.display = "none";
-        document.querySelector("body").innerHTML = `    <header>
-      <span id="exitTime" class="topBar" onclick="updateExitTime()"></span>
-      <span id="logo" class="topBar">? מי בטרמפ</span>
-      <span class="topBar" id="datetime"></span>
-    </header>
-    <main>
-      <div id="frontCar">
-        <span class="person" id="driver" onclick="addDriver(this)">נהג/ת</span>
-        <span class="person" id="passenger1" onclick="addName(this)"
-          >הוספת נוסע/ת</span
-        >
-      </div>
-      <div id="backCar">
-        <span class="person" id="passenger2" onclick="addName(this)"
-          >הוספת נוסע/ת</span
-        >
-        <span class="person" id="passenger3" onclick="addName(this)"
-          >הוספת נוסע/ת</span
-        >
-        <span class="person" id="passenger4" onclick="addName(this)"
-          >הוספת נוסע/ת</span
-        >
-      </div>
-    </main>
-    <footer>&copy; Zion Amar</footer>`;
+        if (document.querySelector("#endDay")) {
+          document.querySelector("#endDay").style.display = "none";
+        }
+        document.querySelector("body").innerHTML = `<header>
+        <span id="exitTime" class="topBar" onclick="updateExitTime()">:שעת יציאה</span>
+        <span id="logo" class="topBar">? מי בטרמפ</span>
+        <span class="topBar" id="datetime"></span>
+      </header>
+      <main>
+        <div id="frontCar">
+          <span class="person" id="driver" onclick="addDriver(this)">נהג/ת</span>
+          <span class="person" id="passenger1" onclick="addName(this)"
+            >הוספת נוסע/ת</span
+          >
+        </div>
+        <div id="backCar">
+          <span class="person" id="passenger2" onclick="addName(this)"
+            >הוספת נוסע/ת</span
+          >
+          <span class="person" id="passenger3" onclick="addName(this)"
+            >הוספת נוסע/ת</span
+          >
+          <span class="person" id="passenger4" onclick="addName(this)"
+            >הוספת נוסע/ת</span
+          >
+        </div>
+      </main>
+      <footer>&copy; Zion Amar</footer>`;
         namesLoad();
         ExitTime();
       }
@@ -375,18 +384,36 @@
         }
         // משכילים רק את שעת היציאה מהמשתנה exitTime
         var exitHour = parseInt(exitTime.split(":")[0]);
+        var startTime;
+        if (localStorage.getItem("timeToStartWork")) {
+          startTime = localStorage.getItem("timeToStartWork");
+        } else {
+          startTime = 6;
+        }
+        // משכילים רק את שעת היציאה מהמשתנה exitTime
+        var startHour = parseInt(startTime.split(":")[0]);
         // אם השעה הנוכחית נמצאת בין השעה שנשמרה לבין חצות או בין חצות לשעה שנשמרה
         if (
           (currentHour >= exitHour && currentHour < 24) ||
-          (currentHour >= 0 && currentHour < 6)
+          (currentHour >= 0 && currentHour < startHour)
         ) {
           endDay();
-        } else {
+        } else if (currentHour == startHour) {
           startDay();
         }
       }
-
+      function loadColor() {
+        let color = localStorage.getItem("color");
+        if (color == "blue") {
+          document.querySelector("body").style.backgroundColor =
+            "rgb(130, 173, 238)";
+          document.querySelector("header").style.backgroundColor = "#acc0f9";
+          document.querySelector("main").style.backgroundColor = "skyblue";
+          document.querySelector("#logo").style.color = "blue";
+        }
+      }
       function init() {
+        loadColor();
         changeView();
         namesLoad();
         ExitTime();
